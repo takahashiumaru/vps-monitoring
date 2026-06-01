@@ -23,12 +23,26 @@ cd vps-monitoring
 
 ### 2. Install dependencies
 
-Use Node.js 22 recommended. If you use `nvm`:
+Use Node.js 22 recommended. On macOS with Homebrew:
 
 ```bash
-nvm install
-nvm use
+brew install node@22
+brew unlink node || true
+brew link --overwrite --force node@22
+node -v
 npm install
+```
+
+If Homebrew does not put `node@22` in your PATH, add this to `~/.zshrc` on Apple Silicon Macs:
+
+```bash
+export PATH="/opt/homebrew/opt/node@22/bin:$PATH"
+```
+
+For Intel Macs, use:
+
+```bash
+export PATH="/usr/local/opt/node@22/bin:$PATH"
 ```
 
 ### 3. Configure env
