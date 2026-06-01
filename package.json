@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "description": "Lightweight VPS server monitoring console — metrics + chat logs viewer",
+  "engines": {
+    "node": ">=20 <25"
+  },
   "type": "commonjs",
   "main": "server.js",
   "scripts": {

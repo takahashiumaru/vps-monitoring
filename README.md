@@ -23,9 +23,11 @@ cd vps-monitoring
 
 ### 2. Install dependencies
 
-Use Node.js 20+ recommended.
+Use Node.js 22 recommended. If you use `nvm`:
 
 ```bash
+nvm install
+nvm use
 npm install
 ```
 
