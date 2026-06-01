@@ -6,11 +6,19 @@
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "mobile:sync": "test -d ios || npx cap add ios; npx cap sync ios",
+    "ios:add": "npx cap add ios",
+    "ios:open": "npx cap open ios"
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
     "express": "^4.21.2",
     "express-rate-limit": "^7.4.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.3.4",
+    "@capacitor/core": "^8.3.4",
+    "@capacitor/ios": "^8.3.4"
   }
 }

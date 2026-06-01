@@ -1,0 +1,12 @@
+{
+  "appId": "id.takahashiumaru.servermonitoring",
+  "appName": "Server Monitoring",
+  "webDir": "public",
+  "server": {
+    "url": "https://monitor.takahashiumaru.web.id",
+    "cleartext": false
+  },
+  "ios": {
+    "contentInset": "automatic"
+  }
+}

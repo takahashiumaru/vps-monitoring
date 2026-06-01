@@ -84,6 +84,49 @@ http://127.0.0.1:3002
 
 Do **not** embed a private SSH key into an iPhone/mobile app. For mobile builds, point the WebView/PWA to the secured VPS dashboard URL instead.
 
+## Build iPhone app on MacBook
+
+This repo includes Capacitor config that wraps the secured production dashboard:
+
+```text
+https://monitor.takahashiumaru.web.id
+```
+
+Requirements on MacBook:
+
+- Node.js 20+
+- Xcode installed from the App Store
+- Apple ID logged in inside Xcode
+- iPhone connected by cable or available via Wi-Fi debugging
+
+Run:
+
+```bash
+git clone https://github.com/takahashiumaru/vps-monitoring.git
+cd vps-monitoring
+npm install
+npm run mobile:sync
+npm run ios:open
+```
+
+Then in Xcode:
+
+1. Select your iPhone as the target device.
+2. Open **Signing & Capabilities**.
+3. Enable **Automatically manage signing**.
+4. Pick your Apple ID / Team.
+5. Press **Run**.
+
+If Xcode says the iOS platform does not exist, run:
+
+```bash
+npm run ios:add
+npm run mobile:sync
+npm run ios:open
+```
+
+If iPhone says **Untrusted Developer**, open iPhone Settings → General → VPN & Device Management, then trust your Apple ID.
+
 ## Production systemd example
 
 Create a user service like:
