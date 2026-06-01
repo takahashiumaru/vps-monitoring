@@ -620,8 +620,40 @@ $('#reboot-btn')?.addEventListener('click', async () => {
   }
 });
 
+// --- Mobile overscroll guard ---
+function installRubberBandGuard() {
+  const guarded = ['.content', '.drawer-body', '.login-screen'];
+  guarded.forEach((selector) => {
+    const el = $(selector);
+    if (!el || el.dataset.overscrollGuard === '1') return;
+    el.dataset.overscrollGuard = '1';
+    let startY = 0;
+    el.addEventListener('touchstart', (ev) => {
+      if (!ev.touches || ev.touches.length !== 1) return;
+      startY = ev.touches[0].clientY;
+      if (el.scrollTop <= 0) el.scrollTop = 1;
+      const max = el.scrollHeight - el.clientHeight;
+      if (el.scrollTop >= max) el.scrollTop = Math.max(0, max - 1);
+    }, { passive: true });
+    el.addEventListener('touchmove', (ev) => {
+      if (!ev.touches || ev.touches.length !== 1) return;
+      const currentY = ev.touches[0].clientY;
+      const deltaY = currentY - startY;
+      const max = el.scrollHeight - el.clientHeight;
+      if (max <= 0) {
+        ev.preventDefault();
+        return;
+      }
+      const pullingDownAtTop = el.scrollTop <= 0 && deltaY > 0;
+      const pullingUpAtBottom = el.scrollTop >= max && deltaY < 0;
+      if (pullingDownAtTop || pullingUpAtBottom) ev.preventDefault();
+    }, { passive: false });
+  });
+}
+
 // --- Boot ---
 (async function init() {
+  installRubberBandGuard();
   try {
     const me = await fetch('/api/me').then((r) => r.json());
     if (me.authed) showApp(me.features); else showLogin();
