@@ -75,6 +75,8 @@ h2 { font-size: 1.08rem; letter-spacing: -.025em; }
 .login-screen { min-height: 100dvh; display: grid; place-items: center; padding: 24px; }
 .login-card { width: min(100%, 410px); background: var(--panel-solid); border: 1px solid var(--line); border-radius: var(--r-xl); padding: 30px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 16px; animation: fadeUp .5s ease both; }
 .login-brand { display: flex; align-items: center; gap: 10px; }
+.brand-mark { width: 44px; height: 44px; border-radius: 14px; display: block; flex: none; box-shadow: 0 10px 26px rgba(0,0,0,.18); }
+.brand-mark-sm { width: 34px; height: 34px; border-radius: 11px; box-shadow: 0 8px 18px rgba(0,0,0,.16); }
 .login-sub { color: var(--muted); font-size: .92rem; }
 .field { display: flex; flex-direction: column; gap: 7px; }
 .field-label { color: var(--muted); font-size: .72rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }

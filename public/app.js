@@ -158,6 +158,13 @@ function applyTheme(theme) {
   localStorage.setItem('hm-theme', theme);
   const btn = $('#theme-btn');
   if (btn) btn.textContent = theme === 'light' ? '☀' : '☾';
+  const themeMeta = $('meta[name="theme-color"]:not([media])');
+  if (themeMeta) themeMeta.content = theme === 'light' ? '#F3F7FB' : '#07111F';
+  $$('.brand-mark').forEach((img) => {
+    img.src = theme === 'light'
+      ? '/logo-light.svg?v=20260601-servermonitor12'
+      : '/logo-dark.svg?v=20260601-servermonitor12';
+  });
 }
 applyTheme(localStorage.getItem('hm-theme') || 'dark');
 $('#theme-btn').addEventListener('click', () => {
