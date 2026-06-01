@@ -162,8 +162,8 @@ function applyTheme(theme) {
   if (themeMeta) themeMeta.content = theme === 'light' ? '#F3F7FB' : '#07111F';
   $$('.brand-mark').forEach((img) => {
     img.src = theme === 'light'
-      ? '/logo-light.svg?v=20260601-servermonitor12'
-      : '/logo-dark.svg?v=20260601-servermonitor12';
+      ? '/logo-light.png?v=20260601-servermonitor13'
+      : '/logo-dark.png?v=20260601-servermonitor13';
   });
 }
 applyTheme(localStorage.getItem('hm-theme') || 'dark');
