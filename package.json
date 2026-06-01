@@ -11,9 +11,9 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "mobile:sync": "test -d ios || npx cap add ios; npx cap sync ios",
-    "ios:add": "npx cap add ios",
-    "ios:open": "npx cap open ios"
+    "mobile:sync": "test -d ios || cap add ios; cap sync ios",
+    "ios:add": "cap add ios",
+    "ios:open": "cap open ios"
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
