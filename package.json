@@ -1,0 +1,16 @@
+{
+  "name": "server-monitoring",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lightweight VPS server monitoring console — metrics + chat logs viewer",
+  "type": "commonjs",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.4.1"
+  }
+}

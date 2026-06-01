@@ -1,0 +1,122 @@
+# Server Monitoring
+
+Lightweight VPS monitoring dashboard built with Express + vanilla HTML/CSS/JS. It shows live CPU/RAM/disk metrics, production app health, resource history charts, and optional Hermes chat history.
+
+## Features
+
+- Live VPS metrics via SSE
+- CPU/RAM/Disk history charts: 1 day, 1 week, 1 month
+- Production app health cards with allowlisted start/stop/restart controls
+- Safe VPS restart confirmation flow
+- Optional Hermes chat history viewer
+- Auto-hides Hermes/Chat UI when Hermes is not installed or `HM_STATE_DB` is missing
+- Mobile-first UI, no React/Vite/build step
+
+## Local run
+
+### 1. Clone
+
+```bash
+git clone https://github.com/takahashiumaru/vps-monitoring.git
+cd vps-monitoring
+```
+
+### 2. Install dependencies
+
+Use Node.js 20+ recommended.
+
+```bash
+npm install
+```
+
+### 3. Configure env
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env`:
+
+```env
+HM_PORT=3002
+HM_HOST=127.0.0.1
+HM_ADMIN_USER=admin
+HM_ADMIN_PASS=change-this-password
+HM_SESSION_SECRET=change-this-long-random-string
+HM_HISTORY_DB=./data/metrics-history.sqlite
+```
+
+Optional Hermes chat history:
+
+```env
+HM_STATE_DB=/home/ubuntu/.hermes/state.db
+```
+
+If `HM_STATE_DB` does not exist, the dashboard still runs and automatically hides the Chat/Hermes UI.
+
+### 4. Start locally
+
+```bash
+npm start
+```
+
+Open:
+
+```text
+http://127.0.0.1:3002
+```
+
+Login with the user/password from `.env`.
+
+## Local testing against the VPS
+
+For local development without exposing SSH keys in the app, use an SSH tunnel:
+
+```bash
+ssh -i /path/to/key -N -L 3002:127.0.0.1:3002 ubuntu@43.133.155.252
+```
+
+Then open locally:
+
+```text
+http://127.0.0.1:3002
+```
+
+Do **not** embed a private SSH key into an iPhone/mobile app. For mobile builds, point the WebView/PWA to the secured VPS dashboard URL instead.
+
+## Production systemd example
+
+Create a user service like:
+
+```ini
+[Unit]
+Description=Server Monitoring
+After=network-online.target
+
+[Service]
+WorkingDirectory=/home/ubuntu/hermes-monitor
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+MemoryMax=120M
+CPUQuota=15%
+TasksMax=32
+EnvironmentFile=/home/ubuntu/hermes-monitor/.env
+
+[Install]
+WantedBy=default.target
+```
+
+Then:
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now server-monitoring.service
+```
+
+## Security notes
+
+- Keep `.env` private and never commit it.
+- App/system controls are allowlisted in code; do not add arbitrary shell execution.
+- Use HTTPS + strong password before exposing publicly.
+- Prefer backend-on-VPS for control actions; avoid shipping SSH keys to clients.

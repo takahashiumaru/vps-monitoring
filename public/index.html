@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0B1220" />
+  <title>Server Monitoring</title>
+  <script>
+    try { document.documentElement.dataset.theme = localStorage.getItem('hm-theme') || 'dark'; } catch (_) {}
+  </script>
+  <link rel="stylesheet" href="/styles.css?v=20260601-servermonitor11" />
+</head>
+<body>
+  <!-- Login view -->
+  <div id="login" class="login-screen" hidden>
+    <form id="login-form" class="login-card" autocomplete="off">
+      <div class="login-brand">
+        <span class="pulse-dot"></span>
+        <h1>Server Monitoring</h1>
+      </div>
+      <p class="login-sub">Masuk untuk melihat metrik server &amp; log percakapan.</p>
+      <label class="field">
+        <span class="field-label">Username</span>
+        <input id="login-user" type="text" name="user" value="admin" autocomplete="username" />
+      </label>
+      <label class="field">
+        <span class="field-label">Password</span>
+        <input id="login-pass" type="password" name="pass" autocomplete="current-password" />
+      </label>
+      <button type="submit" class="btn-primary" id="login-btn">Masuk</button>
+      <p id="login-error" class="login-error" hidden></p>
+    </form>
+  </div>
+
+  <!-- App shell -->
+  <div id="app" class="app-shell" hidden>
+    <header class="topbar">
+      <div class="topbar-brand">
+        <span class="pulse-dot"></span>
+        <span class="topbar-title">Server Monitoring</span>
+      </div>
+      <div class="topbar-right">
+        <span id="host-name" class="host-name mono"></span>
+        <button id="theme-btn" class="btn-ghost theme-btn" type="button" title="Ganti tema">☾</button>
+        <button id="logout-btn" class="btn-ghost" title="Keluar">Keluar</button>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- Overview -->
+      <section id="view-overview" class="view">
+        <div class="hero-panel">
+          <div class="hero-copy">
+            <span class="eyebrow">server live ops</span>
+            <h1>Pusat kendali performa VPS dan aplikasi production.</h1>
+            <p>Data VPS real-time + histori chat seperlunya, dibaca read-only dan hemat resource.</p>
+          </div>
+          <div class="hero-rings">
+            <div class="orbital-card cpu-orbit">
+              <div class="orbit-ring"></div>
+              <div class="orbit-core"><span id="hero-cpu">--</span><small>CPU</small></div>
+            </div>
+            <div class="orbital-card mem-orbit">
+              <div class="orbit-ring"></div>
+              <div class="orbit-core"><span id="hero-ram">--</span><small>RAM</small></div>
+            </div>
+            <div class="orbital-card disk-orbit">
+              <div class="orbit-ring"></div>
+              <div class="orbit-core"><span id="hero-disk">--</span><small>DISK</small></div>
+            </div>
+          </div>
+        </div>
+        <div id="metric-cards" class="metric-grid"></div>
+        <div class="insight-grid">
+          <div class="card activity-card">
+            <div class="card-head">
+              <div>
+                <span class="eyebrow">routing</span>
+                <h2>Aktivitas platform</h2>
+              </div>
+            </div>
+            <div id="source-bars" class="source-bars"></div>
+          </div>
+          <div class="card pulse-card">
+            <span class="eyebrow">status</span>
+            <h2>Gateway sehat</h2>
+            <p>Dashboard streaming tiap 5 detik, DB dibaca read-only.</p>
+            <div class="pulse-line"><span></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chats -->
+      <section id="view-chats" class="view" hidden>
+        <div class="card">
+          <div class="card-head chats-head">
+            <h2>Log Percakapan</h2>
+            <div class="filters">
+              <input id="chat-search" class="search-input" type="search" placeholder="Cari judul / ID…" />
+              <div id="source-filter" class="seg"></div>
+            </div>
+          </div>
+          <div id="session-list" class="session-list"></div>
+          <div id="session-more" class="more-row" hidden>
+            <button id="load-more" class="btn-ghost">Muat lebih banyak</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- System -->
+      <section id="view-system" class="view system-view" hidden>
+        <div class="system-hero card">
+          <div>
+            <span class="eyebrow">node health</span>
+            <h1 id="system-host">Server aktif</h1>
+            <p id="system-meta">Membaca status VPS...</p>
+          </div>
+          <div class="system-badge">
+            <span class="pulse-dot"></span>
+            <strong>ONLINE</strong>
+          </div>
+        </div>
+        <div class="system-subnav-wrap">
+          <div id="system-subnav" class="system-subnav seg" role="tablist" aria-label="Menu sistem">
+            <button data-system-panel="status" class="active" type="button">Status</button>
+            <button data-system-panel="apps" type="button">Apps</button>
+            <button data-system-panel="history" type="button">History</button>
+            <button data-system-panel="control" type="button">Control</button>
+          </div>
+        </div>
+
+        <div id="system-panel-status" class="system-panel" data-panel="status">
+          <div id="system-cards" class="system-grid"></div>
+        </div>
+
+        <div id="system-panel-apps" class="system-panel" data-panel="apps" hidden>
+          <div class="section-card card">
+            <div class="card-head">
+              <div>
+                <span class="eyebrow">production apps</span>
+                <h2>App production</h2>
+              </div>
+              <button id="refresh-apps" class="btn-ghost" type="button">Refresh</button>
+            </div>
+            <div id="app-health-list" class="app-health-list"></div>
+          </div>
+        </div>
+
+        <div id="system-panel-history" class="system-panel" data-panel="history" hidden>
+          <div class="section-card card">
+            <div class="card-head">
+              <div>
+                <span class="eyebrow">history</span>
+                <h2>Grafik resource</h2>
+              </div>
+              <div id="history-range" class="seg compact-seg">
+                <button data-range="1d" class="active">1 Hari</button>
+                <button data-range="7d">1 Minggu</button>
+                <button data-range="30d">1 Bulan</button>
+              </div>
+            </div>
+            <div id="history-metric" class="metric-switch seg compact-seg">
+              <button data-metric="cpu" class="active">CPU</button>
+              <button data-metric="ram">RAM</button>
+              <button data-metric="disk">Disk</button>
+            </div>
+            <div id="history-charts" class="history-focus"></div>
+          </div>
+        </div>
+
+        <div id="system-panel-control" class="system-panel" data-panel="control" hidden>
+          <div class="section-card card danger-zone">
+            <div>
+              <span class="eyebrow">control</span>
+              <h2>Restart VPS</h2>
+              <p>Butuh konfirmasi ketik <strong>RESTART SERVER</strong>. Jangan dipakai kecuali perlu.</p>
+            </div>
+            <button id="reboot-btn" class="btn-danger" type="button">Restart VPS</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Bottom nav (mobile) / left rail (desktop) -->
+    <nav class="tabbar">
+      <button class="tab active" data-view="overview">
+        <svg viewBox="0 0 24 24" class="tab-ico"><path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/></svg>
+        <span>Ringkasan</span>
+      </button>
+      <button class="tab" data-view="chats">
+        <svg viewBox="0 0 24 24" class="tab-ico"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+        <span>Chat</span>
+      </button>
+      <button class="tab" data-view="system">
+        <svg viewBox="0 0 24 24" class="tab-ico"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+        <span>Sistem</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Transcript drawer -->
+  <div id="drawer" class="drawer" hidden>
+    <div class="drawer-backdrop" data-close></div>
+    <div class="drawer-panel">
+      <div class="drawer-head">
+        <div>
+          <h2 id="drawer-title">Percakapan</h2>
+          <p id="drawer-meta" class="drawer-meta mono"></p>
+        </div>
+        <div class="drawer-actions">
+          <button id="logic-toggle" class="btn-ghost logic-toggle" type="button" aria-pressed="false" title="Tampilkan logika Vera (tool calls)">
+            <svg viewBox="0 0 24 24" class="logic-ico"><path d="M9.4 16.6 4.8 12l4.6-4.6L8 6l-6 6 6 6zm5.2 0L19.2 12l-4.6-4.6L16 6l6 6-6 6z"/></svg>
+            <span>Logika</span>
+          </button>
+          <button class="btn-ghost" data-close>Tutup</button>
+        </div>
+      </div>
+      <div id="drawer-body" class="drawer-body"></div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal" hidden>
+    <div class="modal-backdrop" data-modal-cancel></div>
+    <section class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-icon" id="modal-icon">!</div>
+      <div class="modal-copy">
+        <h2 id="modal-title">Konfirmasi</h2>
+        <p id="modal-message">Lanjutkan aksi?</p>
+      </div>
+      <input id="modal-input" class="modal-input" type="text" autocomplete="off" hidden />
+      <div class="modal-actions">
+        <button id="modal-cancel" class="btn-ghost" type="button">Batal</button>
+        <button id="modal-ok" class="btn-primary" type="button">Lanjut</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="/app.js?v=20260601-servermonitor11"></script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+'use strict';
+
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const rateLimit = require('express-rate-limit');
+const config = require('./config');
+const metrics = require('./lib/metrics');
+const db = require('./lib/db');
+const auth = require('./lib/auth');
+const apps = require('./lib/apps');
+const history = require('./lib/history');
+const systemActions = require('./lib/system-actions');
+
+const app = express();
+app.disable('x-powered-by');
+app.use(express.json({ limit: '64kb' }));
+
+// --- Security headers (lightweight, no extra dep) ---
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('Referrer-Policy', 'no-referrer');
+  next();
+});
+
+// --- Login: rate-limited to blunt brute force ---
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'too many attempts, try later' },
+});
+
+const controlLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'terlalu banyak aksi kontrol, coba lagi nanti' },
+});
+
+const rebootLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 1,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skipFailedRequests: true,
+  message: { error: 'restart VPS dibatasi, coba lagi nanti' },
+});
+
+app.post('/api/login', loginLimiter, (req, res) => {
+  const { user, pass } = req.body || {};
+  if (!auth.checkCredentials(user, pass)) {
+    return res.status(401).json({ error: 'invalid credentials' });
+  }
+  const token = auth.issueToken();
+  res.setHeader('Set-Cookie',
+    `${auth.COOKIE}=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=${Math.floor(config.sessionTtlMs / 1000)}`);
+  res.json({ ok: true });
+});
+
+app.post('/api/logout', (req, res) => {
+  res.setHeader('Set-Cookie', `${auth.COOKIE}=; HttpOnly; SameSite=Strict; Path=/; Max-Age=0`);
+  res.json({ ok: true });
+});
+
+function featureFlags() {
+  const hermesDb = !!(config.stateDbPath && fs.existsSync(config.stateDbPath));
+  return {
+    hermes: {
+      available: hermesDb,
+      chatHistory: hermesDb,
+      stateDbConfigured: !!config.stateDbPath,
+    },
+  };
+}
+
+app.get('/api/me', (req, res) => {
+  const token = (req.headers.cookie || '').split(';').map((s) => s.trim())
+    .find((s) => s.startsWith(auth.COOKIE + '='));
+  const payload = token ? auth.verify(token.split('=')[1]) : null;
+  res.json({ authed: !!payload, user: payload ? payload.sub : null, features: featureFlags() });
+});
+
+app.get('/api/features', auth.requireAuth, (req, res) => {
+  res.json(featureFlags());
+});
+
+// --- Protected API ---
+app.get('/api/stats', auth.requireAuth, (req, res) => {
+  if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+  try { res.json(db.stats()); }
+  catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+});
+
+app.get('/api/sessions', auth.requireAuth, (req, res) => {
+  if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+  try {
+    const out = db.sessions({
+      source: req.query.source || null,
+      limit: parseInt(req.query.limit || '30', 10),
+      offset: parseInt(req.query.offset || '0', 10),
+      search: req.query.q || null,
+    });
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+});
+
+app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
+  if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+  try {
+    const out = db.messages(req.params.id, { limit: parseInt(req.query.limit || '500', 10) });
+    if (!out) return res.status(404).json({ error: 'session not found' });
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+});
+
+// --- Live metrics over Server-Sent Events ---
+app.get('/api/metrics/stream', auth.requireAuth, (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
+
+  const send = () => {
+    try {
+      res.write(`data: ${JSON.stringify(metrics.snapshot())}\n\n`);
+    } catch (e) { /* client gone */ }
+  };
+  send();
+  const timer = setInterval(send, config.metricsIntervalMs);
+  req.on('close', () => clearInterval(timer));
+});
+
+// One-shot metrics (fallback if SSE unsupported).
+app.get('/api/metrics', auth.requireAuth, (req, res) => {
+  res.json(metrics.snapshot());
+});
+
+app.get('/api/apps', auth.requireAuth, async (req, res) => {
+  try { res.json({ apps: await apps.listAppHealth() }); }
+  catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+});
+
+app.post('/api/apps/:id/restart', auth.requireAuth, controlLimiter, async (req, res) => {
+  try {
+    const result = await apps.restartApp(req.params.id);
+    if (!result.ok) return res.status(result.status || 500).json({ error: result.error || 'restart failed', result });
+    res.json({ ok: true, result });
+  } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+});
+
+app.post('/api/apps/:id/:action', auth.requireAuth, controlLimiter, async (req, res) => {
+  const action = req.params.action;
+  if (!['start', 'stop'].includes(action)) return res.status(404).json({ error: 'unknown app action' });
+  try {
+    const result = await apps.controlApp(req.params.id, action);
+    if (!result.ok) return res.status(result.status || 500).json({ error: result.error || `${action} failed`, result });
+    res.json({ ok: true, result });
+  } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+});
+
+app.get('/api/history', auth.requireAuth, (req, res) => {
+  try { res.json(history.history(req.query.range || '1d')); }
+  catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+});
+
+app.post('/api/system/reboot', auth.requireAuth, rebootLimiter, (req, res) => {
+  const confirm = String((req.body || {}).confirm || '').trim();
+  if (confirm !== 'RESTART SERVER') return res.status(400).json({ error: 'konfirmasi harus persis: RESTART SERVER' });
+  res.json({ ok: true, message: 'Restart VPS dijadwalkan. Dashboard akan offline sebentar.' });
+  setTimeout(() => { systemActions.rebootServer().catch(() => {}); }, 500).unref();
+});
+
+function sendAppShell(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+}
+
+app.get(['/', '/index.html'], sendAppShell);
+
+// --- Static frontend (tiny, cached, no build server) ---
+app.use(express.static(path.join(__dirname, 'public'), {
+  extensions: ['html'],
+  maxAge: '1h',
+  etag: true,
+}));
+
+// SPA fallback to login/dashboard shell.
+app.get('*', sendAppShell);
+
+history.start();
+
+const server = app.listen(config.port, config.host, () => {
+  console.log(`[server-monitoring] listening on http://${config.host}:${config.port}`);
+  console.log(`[server-monitoring] state.db: ${config.stateDbPath}`);
+});
+
+function shutdown() {
+  try { history.close(); } catch (e) {}
+  server.close(() => process.exit(0));
+  // SSE/live clients can keep the event loop open; do not let restart hang.
+  setTimeout(() => process.exit(0), 1500).unref();
+}
+
+process.on('SIGTERM', shutdown);
+process.on('SIGINT', shutdown);
