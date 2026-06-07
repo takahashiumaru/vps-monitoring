@@ -104,7 +104,7 @@ input:focus, .search-input:focus { outline: none; border-color: rgba(39,216,255,
 .topbar-title { min-width: 0; font-weight: 900; letter-spacing: -.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .topbar-right { flex: none; display: flex; align-items: center; gap: 6px; }
 .host-name { display: none; color: var(--faint); font-size: .72rem; }
-.content { width: 100%; max-width: 1240px; min-width: 0; margin: 0 auto; padding: 12px 10px calc(78px + env(safe-area-inset-bottom)); overflow-x: clip; }
+.content { width: 100%; max-width: 1240px; min-width: 0; margin: 0 auto; padding: 12px 10px calc(58px + env(safe-area-inset-bottom)); overflow-x: clip; }
 .view { min-width: 0; display: flex; flex-direction: column; gap: 16px; animation: fadeUp .35s ease both; }
 
 /* Hero */
@@ -222,10 +222,10 @@ input:focus, .search-input:focus { outline: none; border-color: rgba(39,216,255,
 .empty { text-align: center; color: var(--muted); padding: 34px 18px; }
 
 /* Navigation */
-.tabbar { position: fixed; left: calc(10px + env(safe-area-inset-left)); right: calc(10px + env(safe-area-inset-right)); bottom: max(10px, env(safe-area-inset-bottom)); z-index: 30; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; padding: 6px; border-radius: 22px; border: 1px solid var(--line); background: var(--panel-solid); box-shadow: var(--shadow); }
-.tab { min-height: 48px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border: 0; border-radius: 17px; background: transparent; color: var(--muted); font: 800 .66rem var(--font); cursor: pointer; transition: .2s; }
-.tab.active { color: #04111e; background: linear-gradient(135deg, var(--cyan), #90f2ff); box-shadow: 0 10px 28px rgba(39,216,255,.22); }
-.tab-ico { width: 21px; height: 21px; fill: currentColor; }
+.tabbar { position: fixed; left: calc(8px + env(safe-area-inset-left)); right: calc(8px + env(safe-area-inset-right)); bottom: max(6px, env(safe-area-inset-bottom)); z-index: 30; display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; padding: 4px; border-radius: 18px; border: 1px solid var(--line); background: var(--panel-solid); box-shadow: 0 10px 30px rgba(2,6,23,.28); }
+.tab { min-height: 38px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; border: 0; border-radius: 14px; background: transparent; color: var(--muted); font: 800 .6rem var(--font); cursor: pointer; transition: .2s; line-height: 1; }
+.tab.active { color: #04111e; background: linear-gradient(135deg, var(--cyan), #90f2ff); box-shadow: 0 8px 20px rgba(39,216,255,.18); }
+.tab-ico { width: 17px; height: 17px; fill: currentColor; }
 
 /* Drawer */
 .drawer { position: fixed; inset: 0; z-index: 50; }

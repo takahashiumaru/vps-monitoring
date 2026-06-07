@@ -620,6 +620,17 @@ $('#reboot-btn')?.addEventListener('click', async () => {
   }
 });
 
+// --- Mobile app-like gesture guards ---
+function installZoomGuard() {
+  const prevent = (ev) => ev.preventDefault();
+  document.addEventListener('gesturestart', prevent, { passive: false });
+  document.addEventListener('gesturechange', prevent, { passive: false });
+  document.addEventListener('gestureend', prevent, { passive: false });
+  document.addEventListener('touchmove', (ev) => {
+    if (ev.touches && ev.touches.length > 1) ev.preventDefault();
+  }, { passive: false });
+}
+
 // --- Mobile overscroll guard ---
 function installRubberBandGuard() {
   const guarded = ['.content', '.drawer-body', '.login-screen'];
@@ -653,6 +664,7 @@ function installRubberBandGuard() {
 
 // --- Boot ---
 (async function init() {
+  installZoomGuard();
   installRubberBandGuard();
   try {
     const me = await fetch('/api/me').then((r) => r.json());
