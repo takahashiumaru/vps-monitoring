@@ -16,6 +16,17 @@ const app = express();
 app.disable('x-powered-by');
 app.use(express.json({ limit: '64kb' }));
 
+// --- Request logging middleware ---
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on('finish', () => {
+    const ms = Date.now() - start;
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} ${res.statusCode} ${ms}ms ${ip}`);
+  });
+  next();
+});
+
 // --- Security headers (lightweight, no extra dep) ---
 app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
@@ -25,30 +36,19 @@ app.use((req, res, next) => {
 });
 
 // --- Login: rate-limited to blunt brute force ---
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,
+// --- Helper for rate limiting ---
+const createLimiter = (ms, max, message, extraOpts = {}) => rateLimit({
+  windowMs: ms,
+  max: max,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: 'too many attempts, try later' },
+  message: { error: message },
+  ...extraOpts,
 });
 
-const controlLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 3,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { error: 'terlalu banyak aksi kontrol, coba lagi nanti' },
-});
-
-const rebootLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
-  max: 1,
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipFailedRequests: true,
-  message: { error: 'restart VPS dibatasi, coba lagi nanti' },
-});
+const loginLimiter = createLimiter(15 * 60 * 1000, 10, 'too many attempts, try later');
+const controlLimiter = createLimiter(10 * 60 * 1000, 3, 'terlalu banyak aksi kontrol, coba lagi nanti');
+const rebootLimiter = createLimiter(10 * 60 * 1000, 1, 'restart VPS dibatasi, coba lagi nanti', { skipFailedRequests: true });
 
 app.post('/api/login', loginLimiter, (req, res) => {
   const { user, pass } = req.body || {};
