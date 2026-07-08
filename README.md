@@ -12,6 +12,40 @@ Lightweight VPS monitoring dashboard built with Express + vanilla HTML/CSS/JS. I
 - Auto-hides Hermes/Chat UI when Hermes is not installed or `HM_STATE_DB` is missing
 - Mobile-first UI, no React/Vite/build step
 
+## API endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `POST` | `/api/login` | — | Authenticate (rate-limited) |
+| `POST` | `/api/logout` | — | Clear session cookie |
+| `GET` | `/api/me` | — | Current auth status |
+| `GET` | `/api/stats` | ✓ | Hermes DB statistics |
+| `GET` | `/api/sessions` | ✓ | List chat sessions (paginated, searchable) |
+| `GET` | `/api/sessions/:id/messages` | ✓ | Messages in a session |
+| `GET` | `/api/metrics` | ✓ | One-shot live metrics snapshot |
+| `GET` | `/api/metrics/stream` | ✓ | Live metrics over SSE |
+| `POST` | `/api/metrics/reset` | ✓ | **Clear all stored metric history** |
+| `GET` | `/api/history?range=1d` | ✓ | History chart data (`1d` / `7d` / `30d`) |
+| `GET` | `/api/apps` | ✓ | Monitored app health |
+| `POST` | `/api/apps/:id/restart` | ✓ | Restart an app (rate-limited) |
+| `POST` | `/api/apps/:id/:action` | ✓ | Start / stop an app |
+| `POST` | `/api/system/reboot` | ✓ | Reboot VPS (confirm: `RESTART SERVER`) |
+
+### Reset history
+
+Delete all stored metric samples (CPU/RAM/disk history charts will be empty until new data is collected):
+
+```bash
+# Requires a valid session cookie (log in first).
+curl -b 'session=<token>' -X POST http://127.0.0.1:3002/api/metrics/reset
+```
+
+Response:
+
+```json
+{ "ok": true, "message": "History cleared" }
+```
+
 ## Local run
 
 ### 1. Clone

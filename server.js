@@ -117,6 +117,15 @@ app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
 });
 
+app.post('/api/metrics/reset', auth.requireAuth, (req, res) => {
+  try {
+    metrics.resetMetrics();
+    res.json({ ok: true, message: 'History cleared' });
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
+});
+
 // --- Live metrics over Server-Sent Events ---
 app.get('/api/metrics/stream', auth.requireAuth, (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream');
