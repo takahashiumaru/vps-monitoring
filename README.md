@@ -16,6 +16,7 @@ Lightweight VPS monitoring dashboard built with Express + vanilla HTML/CSS/JS. I
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
+| `GET` | `/api/health` | — | Health check: DB reachability + uptime |
 | `POST` | `/api/login` | — | Authenticate (rate-limited) |
 | `POST` | `/api/logout` | — | Clear session cookie |
 | `GET` | `/api/me` | — | Current auth status |
