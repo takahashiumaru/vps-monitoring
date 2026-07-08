@@ -117,6 +117,35 @@ app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
 });
 
+// --- Health check for observability ---
+app.get('/api/health', (req, res) => {
+  const historyOk = (() => {
+    try {
+      const conn = new (require('better-sqlite3'))(config.historyDbPath, { readonly: true });
+      conn.prepare('SELECT 1 AS ok').get();
+      conn.close();
+      return true;
+    } catch (e) { return false; }
+  })();
+  const stateOk = (() => {
+    if (!config.stateDbPath || !fs.existsSync(config.stateDbPath)) return null;
+    try {
+      const conn = new (require('better-sqlite3'))(config.stateDbPath, { readonly: true });
+      conn.prepare('SELECT 1 AS ok').get();
+      conn.close();
+      return true;
+    } catch (e) { return false; }
+  })();
+  res.json({
+    status: historyOk && stateOk !== false ? 'ok' : 'degraded',
+    uptime: { system: os.uptime(), process: process.uptime() },
+    dbs: {
+      history: { reachable: historyOk },
+      state: stateOk === null ? { reachable: null, reason: 'not configured' } : { reachable: stateOk },
+    },
+  });
+});
+
 app.post('/api/metrics/reset', auth.requireAuth, (req, res) => {
   try {
     metrics.resetMetrics();
