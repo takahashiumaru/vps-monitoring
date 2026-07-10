@@ -16,7 +16,7 @@ Lightweight VPS monitoring dashboard built with Express + vanilla HTML/CSS/JS. I
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| `GET` | `/api/health` | — | Health check: DB reachability + uptime |
+| `GET` | `/api/health` | — | Health check: DB reachability, query latency, and uptime |
 | `POST` | `/api/login` | — | Authenticate (rate-limited) |
 | `POST` | `/api/logout` | — | Clear session cookie |
 | `GET` | `/api/me` | — | Current auth status |
@@ -31,6 +31,23 @@ Lightweight VPS monitoring dashboard built with Express + vanilla HTML/CSS/JS. I
 | `POST` | `/api/apps/:id/restart` | ✓ | Restart an app (rate-limited) |
 | `POST` | `/api/apps/:id/:action` | ✓ | Start / stop an app |
 | `POST` | `/api/system/reboot` | ✓ | Reboot VPS (confirm: `RESTART SERVER`) |
+
+### Health check
+
+`GET /api/health` is intentionally public for uptime monitors. It returns the process/system uptime plus SQLite reachability for the metrics history database and optional Hermes state database. Successful DB probes include `latencyMs`; missing optional Hermes state DB returns `reachable: null` with a reason, while failed required history DB probes make the top-level `status` become `degraded`.
+
+Example:
+
+```json
+{
+  "status": "ok",
+  "uptime": { "system": 123456, "process": 42 },
+  "dbs": {
+    "history": { "reachable": true, "latencyMs": 1 },
+    "state": { "reachable": null, "reason": "not configured" }
+  }
+}
+```
 
 ### Reset history
 
