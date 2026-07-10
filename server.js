@@ -5,6 +5,7 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
+const Database = require('better-sqlite3');
 const config = require('./config');
 const metrics = require('./lib/metrics');
 const db = require('./lib/db');
@@ -118,31 +119,36 @@ app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
   } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
 });
 
+function checkSqliteDb(dbPath, { optional = false } = {}) {
+  if (!dbPath || !fs.existsSync(dbPath)) {
+    return optional
+      ? { reachable: null, reason: 'not configured' }
+      : { reachable: false, reason: 'missing' };
+  }
+
+  const started = Date.now();
+  let conn;
+  try {
+    conn = new Database(dbPath, { readonly: true });
+    conn.prepare('SELECT 1 AS ok').get();
+    return { reachable: true, latencyMs: Date.now() - started };
+  } catch (e) {
+    return { reachable: false, latencyMs: Date.now() - started, error: String(e.message || e) };
+  } finally {
+    if (conn) conn.close();
+  }
+}
+
 // --- Health check for observability ---
 app.get('/api/health', (req, res) => {
-  const historyOk = (() => {
-    try {
-      const conn = new (require('better-sqlite3'))(config.historyDbPath, { readonly: true });
-      conn.prepare('SELECT 1 AS ok').get();
-      conn.close();
-      return true;
-    } catch (e) { return false; }
-  })();
-  const stateOk = (() => {
-    if (!config.stateDbPath || !fs.existsSync(config.stateDbPath)) return null;
-    try {
-      const conn = new (require('better-sqlite3'))(config.stateDbPath, { readonly: true });
-      conn.prepare('SELECT 1 AS ok').get();
-      conn.close();
-      return true;
-    } catch (e) { return false; }
-  })();
+  const historyDb = checkSqliteDb(config.historyDbPath);
+  const stateDb = checkSqliteDb(config.stateDbPath, { optional: true });
   res.json({
-    status: historyOk && stateOk !== false ? 'ok' : 'degraded',
+    status: historyDb.reachable && stateDb.reachable !== false ? 'ok' : 'degraded',
     uptime: { system: os.uptime(), process: process.uptime() },
     dbs: {
-      history: { reachable: historyOk },
-      state: stateOk === null ? { reachable: null, reason: 'not configured' } : { reachable: stateOk },
+      history: historyDb,
+      state: stateDb,
     },
   });
 });
