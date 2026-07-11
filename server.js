@@ -92,6 +92,15 @@ app.get('/api/me', (req, res) => {
   res.json({ authed: !!payload, user: payload ? payload.sub : null, features: featureFlags() });
 });
 
+app.get('/api/version', (req, res) => {
+  try {
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+    res.json({ version: pkg.version });
+  } catch (e) {
+    res.status(500).json({ error: 'failed to read version' });
+  }
+});
+
 app.get('/api/features', auth.requireAuth, (req, res) => {
   res.json(featureFlags());
 });
