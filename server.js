@@ -122,7 +122,7 @@ app.get('/api/sessions', auth.requireAuth, (req, res) => {
       offset: parseBoundedInt(req.query.offset, 0, { min: 0 }),
       search: req.query.q || null,
     });
-    res.json(out);
+    res.json(http.paginatedResponse(out.sessions, out.total, Math.floor(parseBoundedInt(req.query.offset, 0) / parseBoundedInt(req.query.limit, 30)) + 1, parseBoundedInt(req.query.limit, 30)));
   } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
 });
 
