@@ -13,6 +13,7 @@ const auth = require('./lib/auth');
 const apps = require('./lib/apps');
 const history = require('./lib/history');
 const systemActions = require('./lib/system-actions');
+const http = require('./lib/http');
 
 const app = express();
 app.disable('x-powered-by');
