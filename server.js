@@ -86,20 +86,16 @@ function parseBoundedInt(value, fallback, { min = 0, max = Number.MAX_SAFE_INTEG
   return Math.min(max, Math.max(min, parsed));
 }
 
+const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+
 app.get('/api/me', (req, res) => {
-  const token = (req.headers.cookie || '').split(';').map((s) => s.trim())
-    .find((s) => s.startsWith(auth.COOKIE + '='));
-  const payload = token ? auth.verify(token.split('=')[1]) : null;
+  const cookies = auth.parseCookie(req.headers.cookie || '');
+  const payload = cookies[auth.COOKIE] ? auth.verify(cookies[auth.COOKIE]) : null;
   res.json({ authed: !!payload, user: payload ? payload.sub : null, features: featureFlags() });
 });
 
 app.get('/api/version', (req, res) => {
-  try {
-    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
-    res.json({ version: pkg.version });
-  } catch (e) {
-    res.status(500).json({ error: 'failed to read version' });
-  }
+  res.json({ version: pkg.version });
 });
 
 app.get('/api/features', auth.requireAuth, (req, res) => {
