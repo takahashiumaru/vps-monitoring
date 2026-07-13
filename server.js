@@ -106,7 +106,7 @@ app.get('/api/features', auth.requireAuth, (req, res) => {
 app.get('/api/stats', auth.requireAuth, (req, res) => {
   if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try { res.json(db.stats()); }
-  catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+  catch (e) { console.error('[error] GET /api/stats:', e); res.status(500).json({ error: String(e.message || e) }); }
 });
 
 app.get('/api/sessions', auth.requireAuth, (req, res) => {
@@ -119,7 +119,7 @@ app.get('/api/sessions', auth.requireAuth, (req, res) => {
       search: req.query.q || null,
     });
     res.json(http.paginatedResponse(out.sessions, out.total, Math.floor(parseBoundedInt(req.query.offset, 0) / parseBoundedInt(req.query.limit, 30)) + 1, parseBoundedInt(req.query.limit, 30)));
-  } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+  } catch (e) { console.error('[error] GET /api/sessions:', e); res.status(500).json({ error: String(e.message || e) }); }
 });
 
 app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
@@ -128,7 +128,7 @@ app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
     const out = db.messages(req.params.id, { limit: parseBoundedInt(req.query.limit, 500, { min: 1, max: 10000 }) });
     if (!out) return res.status(404).json({ error: 'session not found' });
     res.json(out);
-  } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+  } catch (e) { console.error('[error] GET /api/sessions/:id/messages:', e); res.status(500).json({ error: String(e.message || e) }); }
 });
 
 function checkSqliteDb(dbPath, { optional = false } = {}) {
