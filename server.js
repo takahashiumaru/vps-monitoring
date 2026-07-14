@@ -102,6 +102,10 @@ app.get('/api/features', auth.requireAuth, (req, res) => {
   res.json(featureFlags());
 });
 
+app.get('/api/config/apps', (req, res) => {
+  res.json({ apps: config.monitoredApps });
+});
+
 // --- Protected API ---
 app.get('/api/stats', auth.requireAuth, (req, res) => {
   if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
