@@ -126,6 +126,15 @@ app.get('/api/sessions', auth.requireAuth, (req, res) => {
   } catch (e) { console.error('[error] GET /api/sessions:', e); res.status(500).json({ error: String(e.message || e) }); }
 });
 
+app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
+  if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+  try {
+    const s = db.session(req.params.id);
+    if (!s) return res.status(404).json({ error: 'session not found' });
+    res.json(s);
+  } catch (e) { console.error('[error] GET /api/sessions/:id:', e); res.status(500).json({ error: String(e.message || e) }); }
+});
+
 app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
   if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
