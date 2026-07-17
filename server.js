@@ -102,7 +102,7 @@ app.get('/api/features', auth.requireAuth, (req, res) => {
   res.json(featureFlags());
 });
 
-app.get('/api/config/apps', (req, res) => {
+app.get('/api/config/apps', auth.requireAuth, (req, res) => {
   res.json({ apps: config.monitoredApps });
 });
 
