@@ -86,7 +86,7 @@ function parseBoundedInt(value, fallback, { min = 0, max = Number.MAX_SAFE_INTEG
   return Math.min(max, Math.max(min, parsed));
 }
 
-const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8'));
+const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
 
 app.get('/api/me', (req, res) => {
   const cookies = auth.parseCookie(req.headers.cookie || '');
