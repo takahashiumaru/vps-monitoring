@@ -27,6 +27,7 @@ Lightweight VPS server monitoring console — metrics + chat logs viewer.
 - `GET /api/version`: Returns current package version.
 - `GET /api/health`: Health status including DB latency.
 - `GET /api/apps`: List monitored apps and their status (requires auth).
+- `GET /api/apps/:id`: Returns detailed health information for a specific app (requires auth).
 - `GET /api/config/apps`: List all monitored applications (requires auth).
 
 ## How to Build & Run
