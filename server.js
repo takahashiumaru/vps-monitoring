@@ -195,6 +195,16 @@ app.get('/api/apps', auth.requireAuth, async (req, res) => {
   catch (e) { res.status(500).json({ error: String(e.message || e) }); }
 });
 
+app.get('/api/apps/:id', auth.requireAuth, async (req, res) => {
+  try {
+    const appInfo = apps.appById(req.params.id);
+    if (!appInfo) return res.status(404).json({ error: 'app not found' });
+    res.json(await apps.healthFor(appInfo));
+  } catch (e) {
+    res.status(500).json({ error: String(e.message || e) });
+  }
+});
+
 app.post('/api/apps/:id/restart', auth.requireAuth, controlLimiter, async (req, res) => {
   try {
     const result = await apps.restartApp(req.params.id);
