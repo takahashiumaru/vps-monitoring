@@ -116,8 +116,12 @@ app.get('/api/config', auth.requireAuth, (req, res) => {
 // --- Protected API ---
 app.get('/api/stats', auth.requireAuth, (req, res) => {
   if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
-  try { res.json(db.stats()); }
-  catch (e) { console.error('[error] GET /api/stats:', e); res.status(500).json({ error: String(e.message || e) }); }
+  try {
+    res.json(db.stats());
+  } catch (error) {
+    console.error('[error] GET /api/stats:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
 });
 
 app.get('/api/sessions', auth.requireAuth, (req, res) => {
@@ -134,7 +138,10 @@ app.get('/api/sessions', auth.requireAuth, (req, res) => {
       search: req.query.q || null,
     });
     res.json(http.paginatedResponse(out.sessions, out.total, page, limit));
-  } catch (e) { console.error('[error] GET /api/sessions:', e); res.status(500).json({ error: String(e.message || e) }); }
+  } catch (error) {
+    console.error('[error] GET /api/sessions:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
 });
 
 app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
@@ -143,7 +150,10 @@ app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
     const s = db.session(req.params.id);
     if (!s) return res.status(404).json({ error: 'session not found' });
     res.json(s);
-  } catch (e) { console.error('[error] GET /api/sessions/:id:', e); res.status(500).json({ error: String(e.message || e) }); }
+  } catch (error) {
+    console.error('[error] GET /api/sessions/:id:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
 });
 
 app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
@@ -152,7 +162,10 @@ app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
     const out = db.messages(req.params.id, { limit: parseBoundedInt(req.query.limit, 500, { min: 1, max: 10000 }) });
     if (!out) return res.status(404).json({ error: 'session not found' });
     res.json(out);
-  } catch (e) { console.error('[error] GET /api/sessions/:id/messages:', e); res.status(500).json({ error: String(e.message || e) }); }
+  } catch (error) {
+    console.error('[error] GET /api/sessions/:id/messages:', error);
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+  }
 });
 
 // --- Health check for observability ---
@@ -174,8 +187,8 @@ app.post('/api/metrics/reset', auth.requireAuth, (req, res) => {
   try {
     metrics.resetMetrics();
     res.json({ ok: true, message: 'History cleared' });
-  } catch (e) {
-    res.status(500).json({ error: String(e.message || e) });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }
 });
 
@@ -203,7 +216,7 @@ app.get('/api/metrics', auth.requireAuth, (req, res) => {
 
 app.get('/api/apps', auth.requireAuth, async (req, res) => {
   try { res.json({ apps: await apps.listAppHealth() }); }
-  catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+  catch (error) { res.status(500).json({ error: error instanceof Error ? error.message : String(error) }); }
 });
 
 app.get('/api/apps/:id', auth.requireAuth, async (req, res) => {
@@ -211,8 +224,8 @@ app.get('/api/apps/:id', auth.requireAuth, async (req, res) => {
     const appInfo = apps.appById(req.params.id);
     if (!appInfo) return res.status(404).json({ error: 'app not found' });
     res.json(await apps.healthFor(appInfo));
-  } catch (e) {
-    res.status(500).json({ error: String(e.message || e) });
+  } catch (error) {
+    res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
   }
 });
 
@@ -221,7 +234,7 @@ app.post('/api/apps/:id/restart', auth.requireAuth, controlLimiter, async (req, 
     const result = await apps.restartApp(req.params.id);
     if (!result.ok) return res.status(result.status || 500).json({ error: result.error || 'restart failed', result });
     res.json({ ok: true, result });
-  } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+  } catch (error) { res.status(500).json({ error: error instanceof Error ? error.message : String(error) }); }
 });
 
 app.post('/api/apps/:id/:action', auth.requireAuth, controlLimiter, async (req, res) => {
@@ -231,12 +244,12 @@ app.post('/api/apps/:id/:action', auth.requireAuth, controlLimiter, async (req, 
     const result = await apps.controlApp(req.params.id, action);
     if (!result.ok) return res.status(result.status || 500).json({ error: result.error || `${action} failed`, result });
     res.json({ ok: true, result });
-  } catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+  } catch (error) { res.status(500).json({ error: error instanceof Error ? error.message : String(error) }); }
 });
 
 app.get('/api/history', auth.requireAuth, (req, res) => {
   try { res.json(history.history(req.query.range || '1d')); }
-  catch (e) { res.status(500).json({ error: String(e.message || e) }); }
+  catch (error) { res.status(500).json({ error: error instanceof Error ? error.message : String(error) }); }
 });
 
 app.post('/api/system/reboot', auth.requireAuth, rebootLimiter, (req, res) => {
