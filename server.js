@@ -116,13 +116,17 @@ app.get('/api/stats', auth.requireAuth, (req, res) => {
 app.get('/api/sessions', auth.requireAuth, (req, res) => {
   if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
+    const limit = parseBoundedInt(req.query.limit, 30, { min: 1, max: 100 });
+    const page = parseBoundedInt(req.query.page, 1, { min: 1 });
+    const offset = (page - 1) * limit;
+
     const out = db.sessions({
       source: req.query.source || null,
-      limit: parseBoundedInt(req.query.limit, 30, { min: 1, max: 100 }),
-      offset: parseBoundedInt(req.query.offset, 0, { min: 0 }),
+      limit,
+      offset,
       search: req.query.q || null,
     });
-    res.json(http.paginatedResponse(out.sessions, out.total, Math.floor(parseBoundedInt(req.query.offset, 0) / parseBoundedInt(req.query.limit, 30)) + 1, parseBoundedInt(req.query.limit, 30)));
+    res.json(http.paginatedResponse(out.sessions, out.total, page, limit));
   } catch (e) { console.error('[error] GET /api/sessions:', e); res.status(500).json({ error: String(e.message || e) }); }
 });
 
