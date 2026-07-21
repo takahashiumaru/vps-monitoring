@@ -229,6 +229,16 @@ app.get('/api/apps/:id', auth.requireAuth, async (req, res) => {
   }
 });
 
+app.get('/api/routes', auth.requireAuth, (req, res) => {
+  const routes = app._router.stack
+    .filter(r => r.route)
+    .map(r => ({
+      path: r.route.path,
+      method: Object.keys(r.route.methods)[0].toUpperCase()
+    }));
+  res.json({ routes });
+});
+
 app.post('/api/apps/:id/restart', auth.requireAuth, controlLimiter, async (req, res) => {
   try {
     const result = await apps.restartApp(req.params.id);
