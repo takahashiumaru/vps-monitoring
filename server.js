@@ -174,6 +174,7 @@ app.get('/api/health', (req, res) => {
   const stateDb = db.checkSqliteDb(config.stateDbPath, { optional: true });
   const stateStatus = stateDb.reachable ? { ...stateDb, ...db.health() } : stateDb;
   res.json({
+    appVersion: pkg.version,
     status: historyDb.reachable && stateDb.reachable !== false ? 'ok' : 'degraded',
     uptime: { system: os.uptime(), process: process.uptime() },
     dbs: {
