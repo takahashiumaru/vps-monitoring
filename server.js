@@ -91,7 +91,7 @@ const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'),
 app.get('/api/me', (req, res) => {
   const cookies = auth.parseCookie(req.headers.cookie || '');
   const payload = cookies[auth.COOKIE] ? auth.verify(cookies[auth.COOKIE]) : null;
-  res.json({ authed: !!payload, user: payload ? payload.sub : null, features: featureFlags() });
+  res.json({ authed: !!payload, user: payload ? payload.sub : null, features: featureFlags(), version: pkg.version });
 });
 
 app.get('/api/version', (req, res) => {
