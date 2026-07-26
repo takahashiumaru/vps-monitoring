@@ -94,10 +94,6 @@ app.get('/api/me', (req, res) => {
   res.json({ authed: !!payload, user: payload ? payload.sub : null, features: featureFlags(), version: pkg.version });
 });
 
-app.get('/api/version', (req, res) => {
-  res.json({ version: pkg.version });
-});
-
 app.get('/api/features', auth.requireAuth, (req, res) => {
   res.json(featureFlags());
 });
@@ -162,7 +158,7 @@ app.get('/api/health', (req, res) => {
   const stateDb = db.checkSqliteDb(config.stateDbPath, { optional: true });
   const stateStatus = stateDb.reachable ? { ...stateDb, ...db.health() } : stateDb;
   res.json({
-    appVersion: pkg.version,
+    version: pkg.version,
     status: historyDb.reachable && stateDb.reachable !== false ? 'ok' : 'degraded',
     uptime: { system: os.uptime(), process: process.uptime() },
     dbs: {
