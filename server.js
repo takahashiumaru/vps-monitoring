@@ -5,7 +5,6 @@ const fs = require('fs');
 const os = require('os');
 const path = require('path');
 const rateLimit = require('express-rate-limit');
-const Database = require('better-sqlite3');
 const config = require('./config');
 const metrics = require('./lib/metrics');
 const db = require('./lib/db');
