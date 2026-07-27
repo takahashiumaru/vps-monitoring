@@ -221,17 +221,17 @@ app.get('/api/routes', auth.requireAuth, (req, res) => {
 app.post('/api/apps/:id/restart', auth.requireAuth, controlLimiter, async (req, res) => {
   try {
     const result = await apps.restartApp(req.params.id);
-    if (!result.ok) return res.status(result.status || 500).json({ error: result.error || 'restart failed', result });
+    if (!result.ok) return http.errorResponse(res, result.error || 'restart failed', result.status || 500);
     res.json({ ok: true, result });
   } catch (error) { return http.errorResponse(res, error); }
 });
 
 app.post('/api/apps/:id/:action', auth.requireAuth, controlLimiter, async (req, res) => {
   const action = req.params.action;
-  if (!['start', 'stop'].includes(action)) return res.status(404).json({ error: 'unknown app action' });
+  if (!['start', 'stop'].includes(action)) return http.errorResponse(res, 'unknown app action', 404);
   try {
     const result = await apps.controlApp(req.params.id, action);
-    if (!result.ok) return res.status(result.status || 500).json({ error: result.error || `${action} failed`, result });
+    if (!result.ok) return http.errorResponse(res, result.error || `${action} failed`, result.status || 500);
     res.json({ ok: true, result });
   } catch (error) { return http.errorResponse(res, error); }
 });
