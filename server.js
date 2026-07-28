@@ -153,16 +153,19 @@ app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
 
 // --- Health check for observability ---
 app.get('/api/health', (req, res) => {
+  const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
+  const health = db.health();
   const historyDb = db.checkSqliteDb(config.historyDbPath);
   const stateDb = db.checkSqliteDb(config.stateDbPath, { optional: true });
-  const stateStatus = stateDb.reachable ? { ...stateDb, ...db.health() } : stateDb;
+  
   res.json({
     version: pkg.version,
     status: historyDb.reachable && stateDb.reachable !== false ? 'ok' : 'degraded',
     uptime: { system: os.uptime(), process: process.uptime() },
+    load: os.loadavg(),
     dbs: {
       history: historyDb,
-      state: stateStatus,
+      state: { ...stateDb, ...health },
     },
   });
 });
