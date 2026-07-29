@@ -13,6 +13,7 @@ const apps = require('./lib/apps');
 const history = require('./lib/history');
 const systemActions = require('./lib/system-actions');
 const http = require('./lib/http');
+const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
 
 const app = express();
 app.disable('x-powered-by');
@@ -85,8 +86,6 @@ function parseBoundedInt(value, fallback, { min = 0, max = Number.MAX_SAFE_INTEG
   return Math.min(max, Math.max(min, parsed));
 }
 
-const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
-
 app.get('/api/me', (req, res) => {
   const cookies = auth.parseCookie(req.headers.cookie || '');
   const payload = cookies[auth.COOKIE] ? auth.verify(cookies[auth.COOKIE]) : null;
@@ -153,7 +152,6 @@ app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
 
 // --- Health check for observability ---
 app.get('/api/health', (req, res) => {
-  const pkg = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'package.json'), 'utf8'));
   const health = db.health();
   const historyDb = db.checkSqliteDb(config.historyDbPath);
   const stateDb = db.checkSqliteDb(config.stateDbPath, { optional: true });
