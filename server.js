@@ -56,7 +56,7 @@ const rebootLimiter = createLimiter(10 * 60 * 1000, 1, 'restart VPS dibatasi, co
 app.post('/api/login', loginLimiter, (req, res) => {
   const { user, pass } = req.body || {};
   if (!auth.checkCredentials(user, pass)) {
-    return res.status(401).json({ error: 'invalid credentials' });
+    return http.errorResponse(res, 'invalid credentials', 401);
   }
   const token = auth.issueToken();
   res.setHeader('Set-Cookie',
@@ -136,7 +136,7 @@ app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
   if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
     const s = db.session(req.params.id);
-    if (!s) return res.status(404).json({ error: 'session not found' });
+    if (!s) return http.errorResponse(res, 'session not found', 404);
     res.json(s);
   } catch (error) { return http.errorResponse(res, error); }
 });
@@ -145,7 +145,7 @@ app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
   if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
     const out = db.messages(req.params.id, { limit: parseBoundedInt(req.query.limit, 500, { min: 1, max: 10000 }) });
-    if (!out) return res.status(404).json({ error: 'session not found' });
+    if (!out) return http.errorResponse(res, 'session not found', 404);
     res.json(out);
   } catch (error) { return http.errorResponse(res, error); }
 });
@@ -204,7 +204,7 @@ app.get('/api/apps', auth.requireAuth, async (req, res) => {
 app.get('/api/apps/:id', auth.requireAuth, async (req, res) => {
   try {
     const appInfo = apps.appById(req.params.id);
-    if (!appInfo) return res.status(404).json({ error: 'app not found' });
+    if (!appInfo) return http.errorResponse(res, 'app not found', 404);
     res.json(await apps.healthFor(appInfo));
   } catch (error) { return http.errorResponse(res, error); }
 });
@@ -243,7 +243,7 @@ app.get('/api/history', auth.requireAuth, (req, res) => {
 
 app.post('/api/system/reboot', auth.requireAuth, rebootLimiter, (req, res) => {
   const confirm = String((req.body || {}).confirm || '').trim();
-  if (confirm !== 'RESTART SERVER') return res.status(400).json({ error: 'konfirmasi harus persis: RESTART SERVER' });
+  if (confirm !== 'RESTART SERVER') return http.errorResponse(res, 'konfirmasi harus persis: RESTART SERVER', 400);
   res.json({ ok: true, message: 'Restart VPS dijadwalkan. Dashboard akan offline sebentar.' });
   setTimeout(() => { systemActions.rebootServer().catch(() => {}); }, 500).unref();
 });
