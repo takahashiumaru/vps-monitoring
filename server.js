@@ -161,6 +161,11 @@ app.get('/api/health', (req, res) => {
     status: historyDb.reachable && stateDb.reachable !== false ? 'ok' : 'degraded',
     uptime: { system: os.uptime(), process: process.uptime() },
     load: os.loadavg(),
+    memory: {
+      system: { total: os.totalmem(), free: os.freemem() },
+      process: process.memoryUsage(),
+    },
+    platform: { arch: process.arch, platform: process.platform, node: process.version },
     dbs: {
       history: historyDb,
       state: { ...stateDb, ...health },
