@@ -151,8 +151,8 @@ app.get('/api/health', (req, res) => {
     uptime: { system: os.uptime(), process: process.uptime() },
     load: os.loadavg(),
     memory: {
-      system: { total: os.totalmem(), free: os.freemem() },
-      process: process.memoryUsage(),
+      system: { total: http.formatBytes(os.totalmem()), free: http.formatBytes(os.freemem()) },
+      process: Object.fromEntries(Object.entries(process.memoryUsage()).map(([k, v]) => [k, http.formatBytes(v)])),
     },
     platform: { arch: process.arch, platform: process.platform, node: process.version },
     dbs: {
