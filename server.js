@@ -69,17 +69,6 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-function featureFlags() {
-  const hermesDb = !!(config.stateDbPath && fs.existsSync(config.stateDbPath));
-  return {
-    hermes: {
-      available: hermesDb,
-      chatHistory: hermesDb,
-      stateDbConfigured: !!config.stateDbPath,
-    },
-  };
-}
-
 function parseBoundedInt(value, fallback, { min = 0, max = Number.MAX_SAFE_INTEGER } = {}) {
   const parsed = Number.parseInt(value, 10);
   if (!Number.isFinite(parsed)) return fallback;
@@ -89,11 +78,11 @@ function parseBoundedInt(value, fallback, { min = 0, max = Number.MAX_SAFE_INTEG
 app.get('/api/me', (req, res) => {
   const cookies = auth.parseCookie(req.headers.cookie || '');
   const payload = cookies[auth.COOKIE] ? auth.verify(cookies[auth.COOKIE]) : null;
-  res.json({ authed: !!payload, user: payload ? payload.sub : null, features: featureFlags(), version: pkg.version });
+  res.json({ authed: !!payload, user: payload ? payload.sub : null, features: systemActions.featureFlags(), version: pkg.version });
 });
 
 app.get('/api/features', auth.requireAuth, (req, res) => {
-  res.json(featureFlags());
+  res.json(systemActions.featureFlags());
 });
 
 app.get('/api/config/apps', auth.requireAuth, (req, res) => {
@@ -109,14 +98,14 @@ app.get('/api/config', auth.requireAuth, (req, res) => {
 
 // --- Protected API ---
 app.get('/api/stats', auth.requireAuth, (req, res) => {
-  if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+  if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
     res.json(db.stats());
   } catch (error) { return http.errorResponse(res, error); }
 });
 
 app.get('/api/sessions', auth.requireAuth, (req, res) => {
-  if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+  if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
     const limit = parseBoundedInt(req.query.limit, 30, { min: 1, max: 100 });
     const page = parseBoundedInt(req.query.page, 1, { min: 1 });
@@ -133,7 +122,7 @@ app.get('/api/sessions', auth.requireAuth, (req, res) => {
 });
 
 app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
-  if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+  if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
     const s = db.session(req.params.id);
     if (!s) return http.errorResponse(res, 'session not found', 404);
@@ -142,7 +131,7 @@ app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
 });
 
 app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
-  if (!featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+  if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
     const out = db.messages(req.params.id, { limit: parseBoundedInt(req.query.limit, 500, { min: 1, max: 10000 }) });
     if (!out) return http.errorResponse(res, 'session not found', 404);
