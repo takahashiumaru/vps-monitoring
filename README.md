@@ -25,3 +25,13 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 
 ## Configuration
 Edit `.env` (see `.env.example` if present) or `config.js`.
+
+## Installation
+```bash
+npm install
+```
+
+## Running
+```bash
+npm start
+```
