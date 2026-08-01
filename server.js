@@ -145,10 +145,16 @@ app.get('/api/health', (req, res) => {
   const historyDb = db.checkSqliteDb(config.historyDbPath);
   const stateDb = db.checkSqliteDb(config.stateDbPath, { optional: true });
   
+  const uptime = {
+    system: os.uptime(),
+    process: process.uptime(),
+    started: new Date(Date.now() - (process.uptime() * 1000)).toISOString()
+  };
+  
   res.json({
     version: pkg.version,
     status: historyDb.reachable && stateDb.reachable !== false ? 'ok' : 'degraded',
-    uptime: { system: os.uptime(), process: process.uptime() },
+    uptime,
     load: os.loadavg(),
     memory: {
       system: { total: http.formatBytes(os.totalmem()), free: http.formatBytes(os.freemem()) },
