@@ -7,3 +7,9 @@ data/*.sqlite-*
 npm-debug.log*
 .DS_Store
 *.log
+dist/
+out/
+tmp/
+logs/
+*.pem
+*.key
