@@ -160,7 +160,7 @@ app.get('/api/health', (req, res) => {
       system: { total: http.formatBytes(os.totalmem()), free: http.formatBytes(os.freemem()) },
       process: Object.fromEntries(Object.entries(process.memoryUsage()).map(([k, v]) => [k, http.formatBytes(v)])),
     },
-    platform: { arch: process.arch, platform: process.platform, node: process.version },
+    platform: { arch: process.arch, platform: process.platform, node: process.version, release: os.release(), totalmem: http.formatBytes(os.totalmem()) },
     dbs: {
       history: historyDb,
       state: { ...stateDb, ...health },
