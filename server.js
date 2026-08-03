@@ -69,12 +69,6 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
-function parseBoundedInt(value, fallback, { min = 0, max = Number.MAX_SAFE_INTEGER } = {}) {
-  const parsed = Number.parseInt(value, 10);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.min(max, Math.max(min, parsed));
-}
-
 app.get('/api/me', (req, res) => {
   const cookies = auth.parseCookie(req.headers.cookie || '');
   const payload = cookies[auth.COOKIE] ? auth.verify(cookies[auth.COOKIE]) : null;
@@ -107,8 +101,8 @@ app.get('/api/stats', auth.requireAuth, (req, res) => {
 app.get('/api/sessions', auth.requireAuth, (req, res) => {
   if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
-    const limit = parseBoundedInt(req.query.limit, 30, { min: 1, max: 100 });
-    const page = parseBoundedInt(req.query.page, 1, { min: 1 });
+    const limit = http.parseBoundedInt(req.query.limit, 30, { min: 1, max: 100 });
+    const page = http.parseBoundedInt(req.query.page, 1, { min: 1 });
     const offset = (page - 1) * limit;
 
     const out = db.sessions({
@@ -133,7 +127,7 @@ app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
 app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
   if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
-    const out = db.messages(req.params.id, { limit: parseBoundedInt(req.query.limit, 500, { min: 1, max: 10000 }) });
+    const out = db.messages(req.params.id, { limit: http.parseBoundedInt(req.query.limit, 500, { min: 1, max: 10000 }) });
     if (!out) return http.errorResponse(res, 'session not found', 404);
     res.json(out);
   } catch (error) { return http.errorResponse(res, error); }
