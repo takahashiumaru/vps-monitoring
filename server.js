@@ -95,7 +95,7 @@ app.get('/api/stats', auth.requireAuth, (req, res) => {
   if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
   try {
     res.json(db.stats());
-  } catch (error) { return http.errorResponse(res, error); }
+  } catch (error) { return http.handleApiError(res, error); }
 });
 
 app.get('/api/sessions', auth.requireAuth, (req, res) => {
@@ -112,7 +112,7 @@ app.get('/api/sessions', auth.requireAuth, (req, res) => {
       search: req.query.q || null,
     });
     res.json(http.paginatedResponse(out.sessions, out.total, page, limit));
-  } catch (error) { return http.errorResponse(res, error); }
+  } catch (error) { return http.handleApiError(res, error); }
 });
 
 app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
@@ -121,7 +121,7 @@ app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
     const s = db.session(req.params.id);
     if (!s) return http.errorResponse(res, 'session not found', 404);
     res.json(s);
-  } catch (error) { return http.errorResponse(res, error); }
+  } catch (error) { return http.handleApiError(res, error); }
 });
 
 app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
@@ -130,7 +130,7 @@ app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
     const out = db.messages(req.params.id, { limit: http.parseBoundedInt(req.query.limit, 500, { min: 1, max: 10000 }) });
     if (!out) return http.errorResponse(res, 'session not found', 404);
     res.json(out);
-  } catch (error) { return http.errorResponse(res, error); }
+  } catch (error) { return http.handleApiError(res, error); }
 });
 
 // --- Health check for observability ---
@@ -166,7 +166,7 @@ app.post('/api/metrics/reset', auth.requireAuth, (req, res) => {
   try {
     metrics.resetMetrics();
     res.json({ ok: true, message: 'History cleared' });
-  } catch (error) { return http.errorResponse(res, error); }
+  } catch (error) { return http.handleApiError(res, error); }
 });
 
 // --- Live metrics over Server-Sent Events ---
@@ -192,7 +192,7 @@ app.get('/api/metrics', auth.requireAuth, (req, res) => {
 });
 
 app.get('/api/apps', auth.requireAuth, async (req, res) => {
-  try { res.json({ apps: await apps.listAppHealth() }); } catch (error) { return http.errorResponse(res, error); }
+  try { res.json({ apps: await apps.listAppHealth() }); } catch (error) { return http.handleApiError(res, error); }
 });
 
 app.get('/api/apps/:id', auth.requireAuth, async (req, res) => {
@@ -200,7 +200,7 @@ app.get('/api/apps/:id', auth.requireAuth, async (req, res) => {
     const appInfo = apps.appById(req.params.id);
     if (!appInfo) return http.errorResponse(res, 'app not found', 404);
     res.json(await apps.healthFor(appInfo));
-  } catch (error) { return http.errorResponse(res, error); }
+  } catch (error) { return http.handleApiError(res, error); }
 });
 
 app.get('/api/routes', auth.requireAuth, (req, res) => {
@@ -218,7 +218,7 @@ app.post('/api/apps/:id/restart', auth.requireAuth, controlLimiter, async (req, 
     const result = await apps.restartApp(req.params.id);
     if (!result.ok) return http.errorResponse(res, result.error || 'restart failed', result.status || 500);
     res.json({ ok: true, result });
-  } catch (error) { return http.errorResponse(res, error); }
+  } catch (error) { return http.handleApiError(res, error); }
 });
 
 app.post('/api/apps/:id/:action', auth.requireAuth, controlLimiter, async (req, res) => {
@@ -228,11 +228,11 @@ app.post('/api/apps/:id/:action', auth.requireAuth, controlLimiter, async (req, 
     const result = await apps.controlApp(req.params.id, action);
     if (!result.ok) return http.errorResponse(res, result.error || `${action} failed`, result.status || 500);
     res.json({ ok: true, result });
-  } catch (error) { return http.errorResponse(res, error); }
+  } catch (error) { return http.handleApiError(res, error); }
 });
 
 app.get('/api/history', auth.requireAuth, (req, res) => {
-  try { res.json(history.history(req.query.range || '1d')); } catch (error) { return http.errorResponse(res, error); }
+  try { res.json(history.history(req.query.range || '1d')); } catch (error) { return http.handleApiError(res, error); }
 });
 
 app.post('/api/system/reboot', auth.requireAuth, rebootLimiter, (req, res) => {
