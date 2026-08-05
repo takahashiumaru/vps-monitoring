@@ -179,7 +179,7 @@ app.get('/api/metrics/stream', auth.requireAuth, (req, res) => {
   const send = () => {
     try {
       res.write(`data: ${JSON.stringify(metrics.snapshot())}\n\n`);
-    } catch (e) { /* client gone */ }
+    } catch (_e) { /* client gone */ }
   };
   send();
   const timer = setInterval(send, config.metricsIntervalMs);
@@ -267,7 +267,7 @@ const server = app.listen(config.port, config.host, () => {
 });
 
 function shutdown() {
-  try { history.close(); } catch (e) {}
+  try { history.close(); } catch (_e) {}
   server.close(() => process.exit(0));
   // SSE/live clients can keep the event loop open; do not let restart hang.
   setTimeout(() => process.exit(0), 1500).unref();
