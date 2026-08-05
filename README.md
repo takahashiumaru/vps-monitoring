@@ -10,6 +10,11 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 ## API
 - `GET /api/health` — status, version, DB health
 - `GET /api/me` — current user
+- `GET /api/sessions` — paginated chat history list (params: limit, page, q, source)
+- `GET /api/sessions/:id` — get chat session detail
+- `GET /api/sessions/:id/messages` — get chat messages for session
+- `GET /api/config` — general runtime config (session TTL, metrics interval)
+- `GET /api/stats` — Hermes DB summary stats
 - `POST /api/login` / `POST /api/logout`
 - `GET /api/features` — feature flags
 - `GET /api/config/apps` — apps config
