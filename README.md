@@ -27,6 +27,8 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 - `POST /api/apps/:id/restart|start|stop` — control apps
 - `GET /api/routes` — list registered routes
 - `POST /api/system/reboot` — reboot VPS (requires confirm="RESTART SERVER")
+- `GET /api/apps` — list managed services
+- `POST /api/apps/:id/:action` — control app action (start, stop, restart)
 
 ## Configuration
 Edit `.env` (see `.env.example` if present) or `config.js`.
