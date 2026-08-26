@@ -105,12 +105,7 @@ app.get('/api/sessions', auth.requireAuth, (req, res) => {
     const page = http.parseBoundedInt(req.query.page, 1, { min: 1 });
     const offset = (page - 1) * limit;
 
-    const out = db.sessions({
-      source: req.query.source || null,
-      limit,
-      offset,
-      search: req.query.q || null,
-    });
+    const out = db.sessions({ source: req.query.source || null, limit, offset, search: req.query.q || null });
     res.json(http.paginatedResponse(out.sessions, out.total, page, limit));
   } catch (error) { return http.handleApiError(res, error); }
 });
