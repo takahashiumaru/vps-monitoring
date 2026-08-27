@@ -177,7 +177,7 @@ function startMetrics() {
   const es = new EventSource('/api/metrics/stream');
   state.sse = es;
   es.onmessage = (ev) => {
-    try { renderMetrics(JSON.parse(ev.data)); } catch (e) {}
+    try { renderMetrics(JSON.parse(ev.data)); } catch (_e) {}
   };
   es.onerror = () => { /* browser auto-reconnects */ };
 }
@@ -301,7 +301,7 @@ async function loadStats() {
       `<div class="sbar-row" style="margin-top:8px;border-top:1px solid var(--line);padding-top:12px">
         <div class="sbar-top"><span class="sbar-name" style="color:var(--text)">Total</span><span class="sbar-count">${fmtNum(s.totals.sessions)} sesi · ${fmtNum(s.userMessages)} pesan user</span></div>
       </div>`;
-  } catch (e) {
+  } catch (_e) {
     $$('.activity-card').forEach((el) => { el.hidden = true; });
   }
 }
@@ -669,5 +669,5 @@ function installRubberBandGuard() {
   try {
     const me = await fetch('/api/me').then((r) => r.json());
     if (me.authed) showApp(me.features); else showLogin();
-  } catch (e) { showLogin(); }
+  } catch (_e) { showLogin(); }
 })();
