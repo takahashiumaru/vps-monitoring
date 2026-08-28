@@ -30,6 +30,13 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 - `GET /api/apps` — list managed services
 - `POST /api/apps/:id/:action` — control app action (start, stop, restart)
 
+## Managed Applications
+The console monitors and controls:
+- **Taka FinTrack**: Next.js personal finance app (`taka-fintrack.service`)
+- **Project Work UAPS**: PHP 8.3 FPM service (`php8.3-fpm.service` + `nginx.service`)
+- **9Router AI Gateway**: Local AI routing gateway on port 20128 (`9router.service`)
+- **Hermes Gateway**: Messaging platform bridge on port 9119 (`hermes-gateway.service`)
+
 ## Configuration
 Edit `.env` (see `.env.example` if present) or `config.js`.
 

@@ -37,5 +37,7 @@ module.exports = {
   monitoredApps: [
     { id: 'taka-fintrack', name: 'Taka FinTrack', service: 'taka-fintrack.service', serviceScope: 'user', url: 'http://127.0.0.1:3001/', publicUrl: 'https://takahashiumaru.my.id/', timeoutMs: 3000, restartable: true, startable: true, stoppable: true },
     { id: 'apsone', name: 'Project Work UAPS', service: 'php8.3-fpm.service', serviceScope: 'system', url: 'https://apsone.web.id/', publicUrl: 'https://apsone.web.id/', timeoutMs: 4000, restartable: true, startable: true, stoppable: true, restartAlso: ['nginx.service'] },
+    { id: '9router', name: '9Router AI Gateway', service: '9router.service', serviceScope: 'user', url: 'http://127.0.0.1:20128/health', timeoutMs: 3000, restartable: true, startable: true, stoppable: true },
+    { id: 'hermes-gateway', name: 'Hermes Gateway', service: 'hermes-gateway.service', serviceScope: 'user', url: 'http://127.0.0.1:9119/', timeoutMs: 3000, restartable: true, startable: true, stoppable: true },
   ],
 };
