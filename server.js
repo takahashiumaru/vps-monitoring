@@ -199,12 +199,18 @@ app.get('/api/apps/:id', auth.requireAuth, async (req, res) => {
 });
 
 app.get('/api/routes', auth.requireAuth, (req, res) => {
-  const routes = app._router.stack
-    .filter(r => r.route)
-    .map(r => ({
-      path: r.route.path,
-      method: Object.keys(r.route.methods)[0].toUpperCase()
-    }));
+  const routes = [];
+  app._router.stack.forEach((r) => {
+    if (r.route) {
+      const methods = Object.keys(r.route.methods).map((m) => m.toUpperCase());
+      const paths = Array.isArray(r.route.path) ? r.route.path : [r.route.path];
+      paths.forEach((p) => {
+        methods.forEach((m) => {
+          routes.push({ path: p, method: m });
+        });
+      });
+    }
+  });
   res.json({ routes });
 });
 
