@@ -14,7 +14,8 @@
     "mobile:sync": "test -d ios || cap add ios; cap sync ios",
     "ios:add": "cap add ios",
     "ios:open": "cap open ios",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
