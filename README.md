@@ -7,28 +7,28 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 - Database: SQLite (via better-sqlite3)
 - Frontend: Simple SPA (Vanilla JS + HTML)
 
-## API
-- `GET /api/health` — status, version, DB health
-- `GET /api/me` — current user
-- `GET /api/sessions` — paginated chat history list (params: limit, page, q, source)
-- `GET /api/sessions/:id` — get chat session detail
-- `GET /api/sessions/:id/messages` — get chat messages for session
-- `GET /api/config` — general runtime config (session TTL, metrics interval)
-- `GET /api/stats` — Hermes DB summary stats
-- `POST /api/login` / `POST /api/logout`
-- `GET /api/features` — feature flags
-- `GET /api/config/apps` — apps config
-- `GET /api/metrics` — latest snapshot
-- `GET /api/metrics/stream` — SSE stream
-- `POST /api/metrics/reset` — clear history
-- `GET /api/history?range=1d|7d|30d` — historical samples
-- `GET /api/apps` — list apps with health
-- `GET /api/apps/:id` — single app health
-- `POST /api/apps/:id/restart|start|stop` — control apps
-- `GET /api/routes` — list registered routes
-- `POST /api/system/reboot` — reboot VPS (requires confirm="RESTART SERVER")
-- `GET /api/apps` — list managed services
-- `POST /api/apps/:id/:action` — control app action (start, stop, restart)
+## API Reference
+- `GET /api/health` — Returns application status, version, uptime, memory, and database health
+- `GET /api/me` — Returns the current authenticated user and enabled feature flags
+- `GET /api/routes` — Returns a list of dynamically registered Express routes
+- `GET /api/features` — Returns active system feature flags
+- `GET /api/stats` — Returns Hermes DB summary stats (tokens, messages, session counts)
+- `GET /api/sessions` — Paginated chat history list (query params: `limit`, `page`, `q`, `source`)
+- `GET /api/sessions/:id` — Returns detail summary for a specific chat session group
+- `GET /api/sessions/:id/messages` — Returns chat messages for a specific session group
+- `GET /api/config` — Returns general runtime config (session TTL, metrics interval)
+- `GET /api/config/apps` — Returns monitored applications configuration
+- `GET /api/metrics` — One-shot system metrics snapshot (CPU, RAM, Disk)
+- `GET /api/metrics/stream` — Live Server-Sent Events (SSE) metrics stream
+- `POST /api/metrics/reset` — Clears cached metrics history
+- `GET /api/history` — Historical metric samples (query params: `range=1d|7d|30d`)
+- `GET /api/apps` — List monitored application services with live health checks
+- `GET /api/apps/:id` — Single monitored application service health check
+- `POST /api/apps/:id/restart` — Restart an application service via Systemd
+- `POST /api/apps/:id/:action` — Control an application service (`start` or `stop`)
+- `POST /api/login` — Authenticate and issue signed session cookie
+- `POST /api/logout` — Clear authenticated session cookie
+- `POST /api/system/reboot` — Reboot VPS gracefully (requires body payload: `{"confirm": "RESTART SERVER"}`)
 
 ## Managed Applications
 The console monitors and controls:
@@ -38,7 +38,7 @@ The console monitors and controls:
 - **Hermes Gateway**: Messaging platform bridge on port 9119 (`hermes-gateway.service`)
 
 ## Configuration
-Edit `.env` (see `.env.example` if present) or `config.js`.
+Edit `.env` (see `.env.example` if present) or modify `config.js`.
 
 ## Installation
 ```bash
