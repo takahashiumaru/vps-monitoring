@@ -15,7 +15,8 @@
     "ios:add": "cap add ios",
     "ios:open": "cap open ios",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "build": "node -e \"process.exit(0)\""
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
