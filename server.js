@@ -248,13 +248,13 @@ app.post('/api/system/reboot', auth.requireAuth, rebootLimiter, (req, res) => {
 
 function sendAppShell(req, res) {
   res.setHeader('Cache-Control', 'no-store');
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join(process.cwd(), 'public', 'index.html'));
 }
 
 app.get(['/', '/index.html'], sendAppShell);
 
 // --- Static frontend (tiny, cached, no build server) ---
-app.use(express.static(path.join(__dirname, 'public'), {
+app.use(express.static(path.join(process.cwd(), 'public'), {
   extensions: ['html'],
   maxAge: '1h',
   etag: true,
