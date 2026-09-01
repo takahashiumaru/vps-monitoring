@@ -140,9 +140,12 @@ app.get('/api/health', (req, res) => {
     started: new Date(Date.now() - (process.uptime() * 1000)).toISOString()
   };
   
-  res.json({
+  // Resilient health status: return 503 if primary DB is unreachable, 200 otherwise
+  const isHealthy = historyDb.reachable && stateDb.reachable !== false;
+  
+  res.status(isHealthy ? 200 : 503).json({
     version: pkg.version,
-    status: historyDb.reachable && stateDb.reachable !== false ? 'ok' : 'degraded',
+    status: isHealthy ? 'ok' : 'degraded',
     uptime,
     load: os.loadavg(),
     memory: {
