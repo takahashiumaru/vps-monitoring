@@ -16,6 +16,7 @@
     "ios:open": "cap open ios",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "test": "node -c server.js config.js lib/*.js",
     "build": "node -e \"process.exit(0)\""
   },
   "dependencies": {
