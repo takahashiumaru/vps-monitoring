@@ -8,7 +8,7 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 - Frontend: Simple SPA (Vanilla JS + HTML)
 
 ## API Reference
-- `GET /api/health` — Returns application status, version, uptime, memory, and database health (200 OK, 503 if degraded)
+- `GET /api/health` — Returns application status, version, uptime, memory, CPU count, and database health (200 OK, 503 if degraded)
 - `GET /api/me` — Returns the current authenticated user and enabled feature flags
 - `GET /api/routes` — Returns a list of dynamically registered Express routes
 - `GET /api/features` — Returns active system feature flags
