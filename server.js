@@ -158,7 +158,8 @@ app.get('/api/health', (req, res) => {
         node: process.version, 
         release: os.release(), 
         totalmem: http.formatBytes(os.totalmem()),
-        cpuCount: os.cpus().length
+        cpuCount: os.cpus().length,
+        hostname: os.hostname()
     },
     dbs: {
       history: historyDb,
