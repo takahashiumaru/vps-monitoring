@@ -9,13 +9,13 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 
 ## API Reference
 - `GET /api/health` — Returns application status, version, uptime, memory, CPU count, hostname, and database health (200 OK, 503 if degraded)
-- `GET /api/me` — Returns the current authenticated user and enabled feature flags
+- `GET /api/me` — Returns the current authenticated user, enabled feature flags, and project version
 - `GET /api/routes` — Returns a list of dynamically registered Express routes
 - `GET /api/features` — Returns active system feature flags
 - `GET /api/stats` — Returns Hermes DB summary stats (tokens, messages, session counts)
 - `GET /api/sessions` — Paginated chat history list (query params: `limit`, `page`, `q`, `source`)
 - `GET /api/sessions/:id` — Returns detail summary for a specific chat session group (404 if not found)
-- `GET /api/sessions/:id/messages` — Returns chat messages for a specific session group
+- `GET /api/sessions/:id/messages` — Returns chat messages for a specific session group (query param: `limit`)
 - `GET /api/config` — Returns general runtime config (session TTL, metrics interval)
 - `GET /api/config/apps` — Returns monitored applications configuration
 - `GET /api/metrics` — One-shot system metrics snapshot (CPU, RAM, Disk)
