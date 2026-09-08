@@ -87,6 +87,9 @@ app.get('/api/config', auth.requireAuth, (req, res) => {
   res.json({
     sessionTtlMs: config.sessionTtlMs,
     metricsIntervalMs: config.metricsIntervalMs,
+    historyIntervalMs: config.historyIntervalMs,
+    historyRetentionMs: config.historyRetentionMs,
+    dbCacheTtlMs: config.dbCacheTtlMs,
   });
 });
 
