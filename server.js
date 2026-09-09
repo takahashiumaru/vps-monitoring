@@ -226,9 +226,10 @@ app.get('/api/routes', auth.requireAuth, (req, res) => {
     if (r.route) {
       const methods = Object.keys(r.route.methods).map((m) => m.toUpperCase());
       const paths = Array.isArray(r.route.path) ? r.route.path : [r.route.path];
+      const requiresAuth = r.route.stack.some((layer) => layer.handle === auth.requireAuth);
       paths.forEach((p) => {
         methods.forEach((m) => {
-          routes.push({ path: p, method: m });
+          routes.push({ path: p, method: m, requiresAuth });
         });
       });
     }
