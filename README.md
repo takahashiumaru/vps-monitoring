@@ -24,6 +24,7 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 - `GET /api/history` — Historical metric samples (query params: `range=1d|7d|30d`)
 - `GET /api/apps` — List monitored application services with live health checks
 - `GET /api/apps/:id` — Single monitored application service health check
+- `GET /api/routes` — Returns a list of dynamically registered Express routes
 - `POST /api/apps/:id/restart` — Restart an application service via Systemd
 - `POST /api/apps/:id/:action` — Control an application service (`start` or `stop`)
 - `POST /api/login` — Authenticate and issue signed session cookie (401 on failure)
