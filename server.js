@@ -150,9 +150,17 @@ app.get('/api/health', (req, res) => {
     version: pkg.version,
     status: isHealthy ? 'ok' : 'degraded',
     uptime,
-    load: os.loadavg(),
+    load: {
+      raw: os.loadavg(),
+      normalized: os.loadavg().map((l) => Number((l / (os.cpus().length || 1)).toFixed(2))),
+    },
     memory: {
-      system: { total: http.formatBytes(os.totalmem()), free: http.formatBytes(os.freemem()) },
+      system: {
+        total: http.formatBytes(os.totalmem()),
+        free: http.formatBytes(os.freemem()),
+        used: http.formatBytes(os.totalmem() - os.freemem()),
+        usedPercent: Number((((os.totalmem() - os.freemem()) / os.totalmem()) * 100).toFixed(2)),
+      },
       process: Object.fromEntries(Object.entries(process.memoryUsage()).map(([k, v]) => [k, http.formatBytes(v)])),
     },
     platform: { 
