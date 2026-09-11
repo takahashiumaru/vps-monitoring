@@ -30,14 +30,14 @@ module.exports = {
   // keep rescanning the live Hermes SQLite database.
   dbCacheTtlMs: parseInt(process.env.HM_DB_CACHE_TTL_MS || '15000', 10),
 
-  historyDbPath: process.env.HM_HISTORY_DB || path.join(__dirname, 'data', 'metrics-history.sqlite'),
+  historyDbPath: process.env.HM_HISTORY_DB || path.join(process.cwd(), 'data', 'metrics-history.sqlite'),
   historyIntervalMs: parseInt(process.env.HM_HISTORY_INTERVAL_MS || '60000', 10),
   historyRetentionMs: 1000 * 60 * 60 * 24 * 35,
 
   monitoredApps: [
     { id: 'taka-fintrack', name: 'Taka FinTrack', service: 'taka-fintrack.service', serviceScope: 'user', url: 'http://127.0.0.1:3001/', publicUrl: 'https://takahashiumaru.my.id/', timeoutMs: 3000, restartable: true, startable: true, stoppable: true },
     { id: 'apsone', name: 'Project Work UAPS', service: 'php8.3-fpm.service', serviceScope: 'system', url: 'https://apsone.web.id/', publicUrl: 'https://apsone.web.id/', timeoutMs: 4000, restartable: true, startable: true, stoppable: true, restartAlso: ['nginx.service'] },
-    { id: '9router', name: '9Router AI Gateway', service: '9router.service', serviceScope: 'user', url: 'http://127.0.0.1:20128/health', timeoutMs: 3000, restartable: true, startable: true, stoppable: true },
+    { id: '9router', name: '9Router AI Gateway', service: '9router.service', serviceScope: 'user', url: 'http://127.0.0.1:20128/api/health', timeoutMs: 3000, restartable: true, startable: true, stoppable: true },
     { id: 'hermes-gateway', name: 'Hermes Gateway', service: 'hermes-gateway.service', serviceScope: 'user', url: 'http://127.0.0.1:9119/', timeoutMs: 3000, restartable: true, startable: true, stoppable: true },
   ],
 };
