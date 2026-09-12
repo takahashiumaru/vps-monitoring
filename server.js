@@ -93,16 +93,21 @@ app.get('/api/config', auth.requireAuth, (req, res) => {
   });
 });
 
+function requireHermesHistory(req, res, next) {
+  if (!systemActions.featureFlags().hermes.chatHistory) {
+    return http.errorResponse(res, 'Hermes chat history is not available on this server', 404);
+  }
+  next();
+}
+
 // --- Protected API ---
-app.get('/api/stats', auth.requireAuth, (req, res) => {
-  if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+app.get('/api/stats', auth.requireAuth, requireHermesHistory, (req, res) => {
   try {
     res.json(db.stats());
   } catch (error) { return http.handleApiError(res, error); }
 });
 
-app.get('/api/sessions', auth.requireAuth, (req, res) => {
-  if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+app.get('/api/sessions', auth.requireAuth, requireHermesHistory, (req, res) => {
   try {
     const limit = http.parseBoundedInt(req.query.limit, 30, { min: 1, max: 100 });
     const page = http.parseBoundedInt(req.query.page, 1, { min: 1 });
@@ -113,8 +118,7 @@ app.get('/api/sessions', auth.requireAuth, (req, res) => {
   } catch (error) { return http.handleApiError(res, error); }
 });
 
-app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
-  if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+app.get('/api/sessions/:id', auth.requireAuth, requireHermesHistory, (req, res) => {
   try {
     const s = db.session(req.params.id);
     if (!s) return http.errorResponse(res, 'session not found', 404);
@@ -122,8 +126,7 @@ app.get('/api/sessions/:id', auth.requireAuth, (req, res) => {
   } catch (error) { return http.handleApiError(res, error); }
 });
 
-app.get('/api/sessions/:id/messages', auth.requireAuth, (req, res) => {
-  if (!systemActions.featureFlags().hermes.chatHistory) return res.status(404).json({ error: 'Hermes chat history is not available on this server' });
+app.get('/api/sessions/:id/messages', auth.requireAuth, requireHermesHistory, (req, res) => {
   try {
     const out = db.messages(req.params.id, { limit: http.parseBoundedInt(req.query.limit, 500, { min: 1, max: 10000 }) });
     if (!out) return http.errorResponse(res, 'session not found', 404);
