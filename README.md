@@ -18,9 +18,9 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 - `GET /api/sessions/:id/messages` — Returns chat messages for a specific session group (query param: `limit`)
 - `GET /api/config` — Returns general runtime config (session TTL, metrics interval, history intervals, and DB cache TTL)
 - `GET /api/config/apps` — Returns monitored applications configuration
-- `GET /api/metrics` — One-shot system metrics snapshot (CPU, RAM, Disk)
+- `GET /api/metrics` — One-shot system metrics snapshot (CPU with load & normalized load, RAM, Disk, Host details)
 - `GET /api/metrics/stream` — Live Server-Sent Events (SSE) metrics stream
-- `POST /api/metrics/reset` — Clears cached metrics history
+- `POST /api/metrics/reset` — Clears cached metrics history (200 OK)
 - `GET /api/history` — Historical metric samples (query params: `range=1d|7d|30d`)
 - `GET /api/apps` — List monitored application services with live health checks
 - `GET /api/apps/:id` — Single monitored application service health check
