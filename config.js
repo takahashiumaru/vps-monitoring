@@ -2,6 +2,7 @@
 
 // Server Monitoring configuration.
 // Env vars override these defaults so secrets never have to live in git.
+const crypto = require('crypto');
 const path = require('path');
 const os = require('os');
 
@@ -17,7 +18,7 @@ module.exports = {
 
   // Session secret for signing the auth cookie. Regenerated each boot unless
   // pinned via env (pin it if you want sessions to survive restarts).
-  sessionSecret: process.env.HM_SESSION_SECRET || require('crypto').randomBytes(32).toString('hex'),
+  sessionSecret: process.env.HM_SESSION_SECRET || crypto.randomBytes(32).toString('hex'),
   sessionTtlMs: 1000 * 60 * 60 * 12, // 12 hours
 
   // Read-only path to the live Hermes session DB.
