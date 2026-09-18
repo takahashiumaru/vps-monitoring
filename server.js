@@ -167,13 +167,13 @@ app.get('/api/health', (req, res) => {
       process: Object.fromEntries(Object.entries(process.memoryUsage()).map(([k, v]) => [k, http.formatBytes(v)])),
     },
     platform: { 
-        arch: process.arch, 
-        platform: process.platform, 
-        node: process.version, 
-        release: os.release(), 
-        totalmem: http.formatBytes(os.totalmem()),
-        cpuCount: os.cpus().length,
-        hostname: os.hostname()
+      arch: process.arch, 
+      platform: process.platform, 
+      node: process.version, 
+      release: os.release(), 
+      totalmem: http.formatBytes(os.totalmem()),
+      cpuCount: os.cpus().length,
+      hostname: os.hostname(),
     },
     dbs: {
       history: historyDb,
