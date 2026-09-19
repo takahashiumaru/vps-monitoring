@@ -11,7 +11,7 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 - `GET /api/health` — Returns application status, version, uptime, memory, CPU count, hostname, and database health (200 OK, 503 if degraded)
 - `GET /api/me` — Returns the current authenticated user, enabled feature flags, and project version
 - `GET /api/routes` — Returns a list of dynamically registered Express routes with HTTP methods and auth status
-- `GET /api/features` — Returns active system feature flags
+- `GET /api/features` — Returns active system feature flags (Hermes state availability)
 - `GET /api/stats` — Returns Hermes DB summary stats (tokens, messages, session counts)
 - `GET /api/sessions` — Paginated chat history list (query params: `limit`, `page`, `q`, `source`)
 - `GET /api/sessions/:id` — Returns detail summary for a specific chat session group (404 if not found)
@@ -29,6 +29,12 @@ Lightweight dashboard for monitoring VPS status (CPU, RAM, Disk, Load) and manag
 - `POST /api/login` — Authenticate and issue signed session cookie (401 on failure)
 - `POST /api/logout` — Clear authenticated session cookie
 - `POST /api/system/reboot` — Reboot VPS gracefully (requires body payload: `{"confirm": "RESTART SERVER"}`) (400 if bad confirmation)
+
+## Security & Rate Limiting
+- **Brute Force Protection**: `/api/login` limited to 10 attempts per 15 minutes window.
+- **Service Control**: `/api/apps/:id/restart` and `/api/apps/:id/:action` limited to 3 actions per 10 minutes window.
+- **Server Reboot Protection**: `/api/system/reboot` limited to 1 request per 10 minutes window with explicit string confirmation (`RESTART SERVER`).
+
 
 ## Managed Applications
 The console monitors and controls:
